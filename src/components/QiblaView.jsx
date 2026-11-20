@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Compass, Navigation } from 'lucide-react';
 import { calculateQibla } from '../utils/prayerUtils';
 
 export default function QiblaView({ locationInfo }) {
   const { bearing, distanceKm } = calculateQibla(locationInfo.lat, locationInfo.lng);
-  const [heading, setHeading] = useState(null);
+  const [smoothHeading, setSmoothHeading] = useState(null);
   const [permissionNeeded, setPermissionNeeded] = useState(false);
+  const prevHeadingRef = useRef(null);
+  const wasAlignedRef = useRef(false);
 
   useEffect(() => {
     if (
@@ -16,15 +18,26 @@ export default function QiblaView({ locationInfo }) {
     }
 
     const handleOrientation = (e) => {
-      let compassHeading = null;
-      if (e.webkitCompassHeading !== undefined) {
-        compassHeading = e.webkitCompassHeading;
+      let rawHeading = null;
+      if (e.webkitCompassHeading !== undefined && e.webkitCompassHeading !== null) {
+        rawHeading = e.webkitCompassHeading;
       } else if (e.alpha !== null) {
-        compassHeading = 360 - e.alpha;
+        rawHeading = (360 - e.alpha) % 360;
       }
-      if (compassHeading !== null) {
-        setHeading(Math.round(compassHeading));
+
+      if (rawHeading === null || isNaN(rawHeading)) return;
+
+      // Shortest-angle smooth interpolation to prevent 359->0 jumps
+      if (prevHeadingRef.current === null) {
+        prevHeadingRef.current = rawHeading;
+      } else {
+        let delta = rawHeading - (prevHeadingRef.current % 360);
+        if (delta > 180) delta -= 360;
+        if (delta < -180) delta += 360;
+        prevHeadingRef.current = prevHeadingRef.current + delta * 0.25;
       }
+
+      setSmoothHeading(prevHeadingRef.current);
     };
 
     window.addEventListener('deviceorientationabsolute', handleOrientation, true);
@@ -47,9 +60,18 @@ export default function QiblaView({ locationInfo }) {
     }
   };
 
-  const needleRotation = heading !== null ? bearing - heading : bearing;
+  const hasSensor = smoothHeading !== null;
+  const dialRotation = hasSensor ? -smoothHeading : 0;
+  const needleRotation = hasSensor ? bearing - smoothHeading : bearing;
   const normalizedDiff = Math.abs(((needleRotation + 540) % 360) - 180);
-  const isAligned = heading !== null && normalizedDiff <= 5;
+  const isAligned = hasSensor && normalizedDiff <= 5;
+
+  useEffect(() => {
+    if (isAligned && !wasAlignedRef.current) {
+      if (navigator.vibrate) navigator.vibrate(25);
+    }
+    wasAlignedRef.current = isAligned;
+  }, [isAligned]);
 
   return (
     <div className="space-y-5 pb-6 text-center">
@@ -73,23 +95,29 @@ export default function QiblaView({ locationInfo }) {
 
         {/* Compass Dial */}
         <div className="relative w-64 h-64 mx-auto my-4 flex items-center justify-center">
+          {/* Outer Ring */}
           <div
             className={`absolute inset-0 rounded-full border-4 transition-colors duration-300 ${
               isAligned
-                ? 'border-amber-400 shadow-[0_0_35px_rgba(251,191,36,0.35)]'
+                ? 'border-amber-400 shadow-[0_0_35px_rgba(251,191,36,0.4)]'
                 : 'border-emerald-700/70'
             } bg-emerald-950/80`}
           />
 
-          {/* Cardinal Points */}
-          <span className="absolute top-3 text-xs font-bold text-amber-300">ش</span>
-          <span className="absolute bottom-3 text-xs font-bold text-emerald-400">ج</span>
-          <span className="absolute right-3 text-xs font-bold text-emerald-400">شر</span>
-          <span className="absolute left-3 text-xs font-bold text-emerald-400">غ</span>
-
-          {/* Rotating Needle */}
+          {/* Rotating Cardinal Dial (Salat First style) */}
           <div
-            className="w-full h-full flex items-center justify-center transition-transform duration-200 ease-out"
+            className="absolute inset-0 transition-transform duration-75 ease-out"
+            style={{ transform: `rotate(${dialRotation}deg)` }}
+          >
+            <span className="absolute top-3 left-1/2 -translate-x-1/2 text-xs font-bold text-amber-300">ش</span>
+            <span className="absolute bottom-3 left-1/2 -translate-x-1/2 text-xs font-bold text-emerald-400">ج</span>
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-emerald-400">شر</span>
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-emerald-400">غ</span>
+          </div>
+
+          {/* Rotating Qibla Needle */}
+          <div
+            className="w-full h-full flex items-center justify-center transition-transform duration-75 ease-out"
             style={{ transform: `rotate(${needleRotation}deg)` }}
           >
             <div className="relative flex flex-col items-center">
@@ -121,10 +149,10 @@ export default function QiblaView({ locationInfo }) {
         </div>
 
         <p className="mt-4 text-xs text-emerald-300/80">
-          {heading !== null
+          {hasSensor
             ? isAligned
               ? 'أنت الآن متجه نحو القبلة بدقة ✓'
-              : 'أدر هاتفك حتى يتطابق السهم مع اتجاه الشمال'
+              : 'أدر هاتفك بسلاسة حتى يضيء السهم باللون الذهبي'
             : 'على الحاسوب: اتجاه القبلة هو شرقاً مائلاً قليلاً نحو الشمال حسب الزاوية أعلاه.'}
         </p>
       </div>
