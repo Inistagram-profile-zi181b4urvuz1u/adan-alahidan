@@ -9,39 +9,6 @@ export const PRAYER_KEYS = [
 
 export const DEFAULT_ADHAN_URL = '/adhan-luhaidan.m4a';
 
-export const MUEZZINS = [
-  {
-    id: 'luhaidan',
-    nameAr: 'الشيخ محمد اللحيدان',
-    descAr: 'الافتراضي • صوت خاشع ومؤثر',
-    url: '/adhan-luhaidan.m4a',
-  },
-  {
-    id: 'makkah',
-    nameAr: 'أذان المسجد الحرام (مكة)',
-    descAr: 'الأذان المكي التقليدي',
-    url: 'https://www.islamcan.com/audio/adhan/azan1.mp3',
-  },
-  {
-    id: 'madinah',
-    nameAr: 'أذان المسجد النبوي (المدينة)',
-    descAr: 'أذان الحرم المدني',
-    url: 'https://www.islamcan.com/audio/adhan/azan2.mp3',
-  },
-  {
-    id: 'alafasy',
-    nameAr: 'الشيخ مشاري راشد العفاسي',
-    descAr: 'صوت عذب وجميل',
-    url: 'https://www.islamcan.com/audio/adhan/azan14.mp3',
-  },
-  {
-    id: 'abdulbasit',
-    nameAr: 'الشيخ عبد الباسط عبد الصمد',
-    descAr: 'أذان مصري كلاسيكي',
-    url: 'https://www.islamcan.com/audio/adhan/azan11.mp3',
-  },
-];
-
 export async function fetchPrayerTimesByCoords(lat, lng, hijriOffset = 0) {
   const url = `https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lng}&method=21&school=0&adjustment=${hijriOffset}`;
   const res = await fetch(url);

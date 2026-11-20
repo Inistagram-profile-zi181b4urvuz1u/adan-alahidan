@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Volume2, Upload, RotateCcw, Clock, Calendar, MapPin, Bell, BellOff } from 'lucide-react';
-import { PRAYER_KEYS, DEFAULT_ADHAN_URL, MUEZZINS } from '../utils/prayerUtils';
+import { PRAYER_KEYS, DEFAULT_ADHAN_URL } from '../utils/prayerUtils';
 
 export default function SettingsView({
   use12Hour,
@@ -57,35 +57,8 @@ export default function SettingsView({
         </div>
 
         <p className="text-xs text-emerald-200">
-          اختر المؤذن المفضل لديك (الافتراضي: <span className="font-bold text-amber-300">الشيخ محمد اللحيدان</span>)
+          الصوت الافتراضي: <span className="font-bold text-amber-300">أذان الشيخ محمد اللحيدان</span>
         </p>
-
-        <div className="space-y-2">
-          {MUEZZINS.map((m) => {
-            const isSelected = adhanUrl === m.url;
-            return (
-              <button
-                key={m.id}
-                onClick={() => onChangeAdhanUrl(m.url)}
-                className={`w-full text-right px-3.5 py-2.5 rounded-xl border flex items-center justify-between transition ${
-                  isSelected
-                    ? 'bg-amber-500/20 border-amber-400/50 text-amber-200'
-                    : 'bg-emerald-950/40 border-emerald-800/50 text-slate-200 hover:bg-emerald-800/40'
-                }`}
-              >
-                <div>
-                  <div className="font-bold text-sm">{m.nameAr}</div>
-                  <div className="text-[11px] text-emerald-300/80">{m.descAr}</div>
-                </div>
-                {isSelected && (
-                  <span className="text-[10px] bg-amber-400/20 text-amber-300 px-2 py-0.5 rounded-full font-bold">
-                    مفعل ✓
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
 
         <div className="space-y-2 pt-2 border-t border-emerald-800/50">
           <label className="block text-xs text-emerald-300">تغيير الصوت (اختياري): رفع ملف صوتي</label>

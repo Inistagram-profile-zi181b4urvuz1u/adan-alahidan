@@ -18,5 +18,12 @@
   <body class="bg-emerald-950 text-slate-50 antialiased selection:bg-amber-400/30 selection:text-amber-200">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(() => {});
+        });
+      }
+    </script>
   </body>
 </html>
