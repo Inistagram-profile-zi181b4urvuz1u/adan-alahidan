@@ -1,0 +1,19 @@
+{
+  "name": "أذان اللحيدان - مواقيت الصلاة بالمغرب",
+  "short_name": "أذان اللحيدان",
+  "description": "تطبيق مواقيت الصلاة بالمغرب بأذان الشيخ محمد اللحيدان",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#022c22",
+  "theme_color": "#064e3b",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "/sheikh-luhaidan.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}
