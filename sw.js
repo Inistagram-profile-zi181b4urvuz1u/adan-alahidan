@@ -1,10 +1,12 @@
-const CACHE_NAME = 'adan-alahidan-v1';
+const CACHE_NAME = 'adan-alahidan-v2';
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/adhan-luhaidan.m4a',
-  '/sheikh-luhaidan.jpg',
+  './',
+  './index.html',
+  './manifest.json',
+  './adhan-luhaidan.m4a',
+  './sheikh-luhaidan.jpg',
+  './icon-192.png',
+  './icon-512.png',
 ];
 
 self.addEventListener('install', (event) => {
@@ -36,7 +38,7 @@ self.addEventListener('fetch', (event) => {
           }
           return res;
         })
-        .catch(() => caches.match('/index.html'));
+        .catch(() => caches.match('./index.html'));
     })
   );
 });
